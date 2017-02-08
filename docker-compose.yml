@@ -1,0 +1,43 @@
+version: '2'
+
+networks:
+  elastic-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.25.0.0/24
+
+services:
+  elasticsearch-node1:
+    image: elasticsearch:5.2
+  #  links:
+  #    - elasticsearch-node2
+  #    - elasticsearch-node3
+    volumes:
+      - ./esdata-node1:/usr/share/elasticsearch/data
+      - ./esconfig:/usr/share/elasticsearch/config
+    restart: always
+    networks:
+      elastic-network:
+        ipv4_address: 172.25.0.101
+    ports:
+      - "9300:9300"
+      - "9200:9200"
+  elasticsearch-node2:
+    image: elasticsearch:5.2
+    volumes:
+      - ./esdata-node2:/usr/share/elasticsearch/data
+      - ./esconfig:/usr/share/elasticsearch/config
+    restart: always
+    networks:
+      elastic-network:
+        ipv4_address: 172.25.0.102
+  elasticsearch-node3:
+    image: elasticsearch:5.2
+    volumes:
+      - ./esdata-node3:/usr/share/elasticsearch/data
+      - ./esconfig:/usr/share/elasticsearch/config
+    restart: always
+    networks:
+      elastic-network:
+        ipv4_address: 172.25.0.103
