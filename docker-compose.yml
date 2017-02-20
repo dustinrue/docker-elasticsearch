@@ -91,3 +91,14 @@ services:
       - elasticsearch-node2
       - elasticsearch-node3
 
+  es-kibana:
+    image: kibana:latest
+    networks:
+      elastic-network:
+        ipv4_address: 172.25.0.106
+    links:
+      - elasticsearch-node1
+    ports:
+      - "5601:5601"
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch-node1:9200
