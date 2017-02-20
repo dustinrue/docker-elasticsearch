@@ -1,4 +1,4 @@
-version: '2'
+version: '3'
 
 networks:
   elastic-network:
@@ -9,35 +9,73 @@ networks:
 
 services:
   elasticsearch-node1:
-    image: elasticsearch:5.2
-  #  links:
-  #    - elasticsearch-node2
-  #    - elasticsearch-node3
+    image: elasticsearch:5.2.1
+    command: -Ediscovery.zen.ping.unicast.hosts=172.25.0.101,172.25.0.102,172.25.0.103 -Ebootstrap.memory_lock=true -Enetwork.host=0.0.0.0       -Enode.name=elasticsearch-node1 -Ediscovery.zen.minimum_master_nodes=2 
     volumes:
       - ./esdata-node1:/usr/share/elasticsearch/data
-      - ./esconfig:/usr/share/elasticsearch/config
     restart: always
     networks:
       elastic-network:
         ipv4_address: 172.25.0.101
-    ports:
-      - "9300:9300"
-      - "9200:9200"
+    environment:
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
   elasticsearch-node2:
-    image: elasticsearch:5.2
+    image: elasticsearch:5.2.1
+    command: -Ediscovery.zen.ping.unicast.hosts=172.25.0.101,172.25.0.102,172.25.0.103 -Ebootstrap.memory_lock=true -Enetwork.host=0.0.0.0       -Enode.name=elasticsearch-node2 -Ediscovery.zen.minimum_master_nodes=2 
     volumes:
       - ./esdata-node2:/usr/share/elasticsearch/data
-      - ./esconfig:/usr/share/elasticsearch/config
     restart: always
     networks:
       elastic-network:
         ipv4_address: 172.25.0.102
+    environment:
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
   elasticsearch-node3:
-    image: elasticsearch:5.2
+    image: elasticsearch:5.2.1
+    command: -Ediscovery.zen.ping.unicast.hosts=172.25.0.101,172.25.0.102,172.25.0.103 -Ebootstrap.memory_lock=true -Enetwork.host=0.0.0.0       -Enode.name=elasticsearch-node3 -Ediscovery.zen.minimum_master_nodes=2 
     volumes:
       - ./esdata-node3:/usr/share/elasticsearch/data
-      - ./esconfig:/usr/share/elasticsearch/config
     restart: always
     networks:
       elastic-network:
         ipv4_address: 172.25.0.103
+    environment:
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+
+  es-nginx:
+    image: nginx:latest
+    links:
+      - elasticsearch-node1
+      - elasticsearch-node2
+      - elasticsearch-node3
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+    networks:
+      elastic-network:
+        ipv4_address: 172.25.0.104
+    ports:
+      - "9200:80"
+  es-cerebro:
+    image: yannart/cerebro:latest
+    volumes:
+      - ./cerebro:/opt/cerebro/conf
+    ports:
+      - "9000:9000"
+    links:
+      - es-nginx
+      - elasticsearch-node1
+      - elasticsearch-node2
+      - elasticsearch-node3
+
