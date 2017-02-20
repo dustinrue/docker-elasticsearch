@@ -14,6 +14,9 @@ services:
     volumes:
       - ./esdata-node1:/usr/share/elasticsearch/data
     restart: always
+    expose:
+      - 9200
+      - 9300
     networks:
       elastic-network:
         ipv4_address: 172.25.0.101
@@ -29,6 +32,9 @@ services:
     volumes:
       - ./esdata-node2:/usr/share/elasticsearch/data
     restart: always
+    expose:
+      - 9200
+      - 9300
     networks:
       elastic-network:
         ipv4_address: 172.25.0.102
@@ -44,6 +50,9 @@ services:
     volumes:
       - ./esdata-node3:/usr/share/elasticsearch/data
     restart: always
+    expose:
+      - 9200
+      - 9300
     networks:
       elastic-network:
         ipv4_address: 172.25.0.103
@@ -68,9 +77,12 @@ services:
     ports:
       - "9200:80"
   es-cerebro:
-    image: yannart/cerebro:latest
+    image: yannart/cerebro:0.5.1
     volumes:
-      - ./cerebro:/opt/cerebro/conf
+      - ./cerebro:/opt/cerebro/conf 
+    networks:
+      elastic-network:
+        ipv4_address: 172.25.0.105
     ports:
       - "9000:9000"
     links:
